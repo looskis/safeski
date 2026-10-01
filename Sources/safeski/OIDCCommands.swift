@@ -130,7 +130,7 @@ extension OIDCCmd {
                 summary = e
                 print("key '\(key)' already exists (\(e.access.rawValue))")
             } else {
-                summary = try b.createKey(CreateKeyParams(name: key, kind: .enclaveSigning, access: access, comment: "safeski OIDC signing key"))
+                summary = try b.createKey(CreateKeyParams(name: key, kind: .enclaveSigning, access: access, comment: "safeski OIDC signing key", labels: ["ssh": "false", "oidc": "true"]))
                 print("created enclave-signing key '\(key)' (access: \(access.rawValue))")
             }
             if let j = OIDCDiscovery.jwk(for: summary), let kid = j["kid"]?.stringValue { print("kid: \(kid)") }

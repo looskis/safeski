@@ -66,7 +66,11 @@ public struct AgreeParams: Codable {
 public struct AgreeResult: Codable { public var sharedSecret: Data }
 public struct CreateKeyParams: Codable {
     public var name: String; public var kind: KeyKind; public var access: AccessPolicy; public var comment: String?
-    public init(name: String, kind: KeyKind, access: AccessPolicy, comment: String?) { self.name = name; self.kind = kind; self.access = access; self.comment = comment }
+    /// Free-form labels, e.g. `ssh = "false"` hides the key from the SSH agent, `oidc = "true"` adds it to the JWKS.
+    public var labels: [String: String]?
+    public init(name: String, kind: KeyKind, access: AccessPolicy, comment: String?, labels: [String: String]? = nil) {
+        self.name = name; self.kind = kind; self.access = access; self.comment = comment; self.labels = labels
+    }
 }
 public struct NameParams: Codable { public var name: String; public init(name: String) { self.name = name } }
 public struct SetSecretParams: Codable {

@@ -93,7 +93,7 @@ public final class Service {
         guard caller.transport == "local" || (caller.uid == getuid() && caller.tokenName == nil) else {
             throw SafeskiError.denied("only the owning user may create keys")
         }
-        let rec = try store.createKey(name: p.name, kind: p.kind, access: p.access, comment: p.comment)
+        let rec = try store.createKey(name: p.name, kind: p.kind, access: p.access, comment: p.comment, labels: p.labels ?? [:])
         try audit.append(action: "key.create", resource: p.name, outcome: "allow", caller: caller,
                          detail: ["kind": .string(p.kind.rawValue), "access": .string(p.access.rawValue)])
         return rec.summary

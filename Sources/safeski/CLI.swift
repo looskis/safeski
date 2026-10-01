@@ -72,11 +72,18 @@ struct Keygen: ParsableCommand {
     @Option(help: "enclave-signing, enclave-agreement, software-ed25519, software-x25519") var kind: KeyKind = .enclaveSigning
     @Option(help: "none, user-presence, biometry-any, biometry-current-set, device-passcode") var access: AccessPolicy = .none
     @Option(help: "Comment (used in SSH public key output).") var comment: String?
+    @Option(name: .long, parsing: .upToNextOption, help: "Label as key=value (e.g. ssh=false hides the key from the SSH agent). Repeatable.") var label: [String] = []
     @OptionGroup var g: GlobalOptions
 
     func run() throws {
         let b = try g.backend()
-        let k = try b.createKey(CreateKeyParams(name: name, kind: kind, access: access, comment: comment))
+        var labels: [String: String] = [:]
+        for l in label {
+            let parts = l.split(separator: "=", maxSplits: 1).map(String.init)
+            guard parts.count == 2 else { Output.fail("label must be key=value: \(l)") }
+            labels[parts[0]] = parts[1]
+        }
+        let k = try b.createKey(CreateKeyParams(name: name, kind: kind, access: access, comment: comment, labels: labels.isEmpty ? nil : labels))
         if g.json { Output.json(k); return }
         print("created \(k.kind.rawValue) key '\(k.name)' (access: \(k.access.rawValue))")
         if k.kind == .enclaveSigning, let pk = try? P256.Signing.PublicKey(x963Representation: k.publicKey) {
