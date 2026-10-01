@@ -65,13 +65,14 @@ public final class Service {
         for (name, tp) in policy.tokens where tp.hash == h {
             if let e = tp.expires, e < Date() { return nil }
             // Token callers are identified by the token alone: peer identity is not trusted
-            // (it may be a relay such as the broker or a container socket proxy, whose uid is the
-            // owner's), so neither code identity nor uid/pid may match policy rules.
+            // (it may be a relay such as the broker or a container socket proxy), so drop every
+            // attribute that policy rules or the approval cache could otherwise match on. pid is
+            // kept for audit attribution only.
             var c = base
             c.tokenName = name
             c.transport = "token"
             c.path = nil; c.parentPath = nil; c.teamID = nil; c.signingID = nil; c.signatureValid = nil
-            c.uid = nil; c.gid = nil; c.pid = nil; c.commandLine = nil
+            c.uid = nil; c.gid = nil; c.commandLine = nil
             return c
         }
         return nil

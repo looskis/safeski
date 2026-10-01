@@ -23,7 +23,8 @@ public struct TOMLParser {
     private var arrayTablePaths: Set<String> = []
 
     public static func parse(_ s: String) throws -> JSONValue {
-        var p = TOMLParser(text: Array(s))
+        // Swift treats "\r\n" as a single Character, which would never match "\n" below.
+        var p = TOMLParser(text: Array(s.replacingOccurrences(of: "\r\n", with: "\n")))
         try p.parseDocument()
         return .object(p.root)
     }
