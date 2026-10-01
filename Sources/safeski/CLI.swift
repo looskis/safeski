@@ -555,6 +555,7 @@ struct Token: ParsableCommand {
         static let configuration = CommandConfiguration(abstract: "Create a token and append it to policy.toml. The token is printed once.")
         @Argument var name: String
         @Option(help: "Lifetime, e.g. 24h, 7d. Default: no expiry.") var expires: String?
+        @Flag(help: "Print `export SAFESKI_TOKEN=...` for eval (containers: safeski docker env/run read it).") var export = false
         func run() throws {
             try Names.validate(name)
             var bytes = [UInt8](repeating: 0, count: 32)
@@ -571,7 +572,7 @@ struct Token: ParsableCommand {
             if text.contains("[tokens.\(name)]") { Output.fail("token '\(name)' already exists in policy") }
             text += block
             try FileIO.writePrivate(Data(text.utf8), to: url)
-            print(token)
+            print(export ? "export SAFESKI_TOKEN=\(token)" : token)
             FileHandle.standardError.write(Data("token '\(name)' added to \(url.path). Grant it access with rules like { token = \"\(name)\" }.\n".utf8))
         }
     }

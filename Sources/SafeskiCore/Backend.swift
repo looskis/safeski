@@ -60,8 +60,11 @@ public final class RemoteBackend: Backend {
     public let client: RPCClient
     public var isRemote: Bool { true }
 
-    public init(socketPath: String, token: String? = nil) {
-        client = RPCClient(socketPath: socketPath, token: token)
+    /// `brokerUser` (uid or username; "" = caller's own uid) routes the connection through the
+    /// root broker socket: a `_broker.connect` hello is sent once after connecting.
+    public init(socketPath: String, token: String? = nil, brokerUser: String? = nil) {
+        let hello = brokerUser.map { BrokerProtocol.connectRequest(user: $0) }
+        client = RPCClient(socketPath: socketPath, token: token, connectHello: hello)
     }
 
     public func status() throws -> StatusResult { try client.call(RPCMethod.status, as: StatusResult.self) }
@@ -93,14 +96,34 @@ public final class RemoteBackend: Backend {
 
 public enum BackendFactory {
     /// Prefer the running agent; fall back to in-process if no agent socket is listening.
+    ///
+    /// Broker routing: if `SAFESKI_USER` is set the request goes through the root broker to that
+    /// user's agent (error if the broker is not running). If no agent socket is listening but the
+    /// broker is, the caller's own agent is reached through the broker (useful from contexts that
+    /// cannot see the per-user runtime dir); if the broker knows no agent for us, fall back to local.
     public static func make(paths: SafeskiPaths = .default, forceLocal: Bool = false) throws -> Backend {
         let env = ProcessInfo.processInfo.environment
+        let token = env["SAFESKI_TOKEN"]
         if !forceLocal {
+            let brokerSock = BrokerConfig.socketPath
+            if let user = env["SAFESKI_USER"], !user.isEmpty {
+                guard UnixSocketClient.isListening(path: brokerSock) else {
+                    throw SafeskiError.io("SAFESKI_USER is set but the broker is not listening at \(brokerSock) (see `safeski broker install`)")
+                }
+                let b = RemoteBackend(socketPath: brokerSock, token: token, brokerUser: user)
+                try b.client.connect()
+                return b
+            }
             if let sock = env["SAFESKI_SOCKET"], !sock.isEmpty, UnixSocketClient.isListening(path: sock) {
-                return RemoteBackend(socketPath: sock, token: env["SAFESKI_TOKEN"])
+                return RemoteBackend(socketPath: sock, token: token)
             }
             if UnixSocketClient.isListening(path: paths.agentSocket.path) {
-                return RemoteBackend(socketPath: paths.agentSocket.path, token: env["SAFESKI_TOKEN"])
+                return RemoteBackend(socketPath: paths.agentSocket.path, token: token)
+            }
+            if UnixSocketClient.isListening(path: brokerSock) {
+                let b = RemoteBackend(socketPath: brokerSock, token: token, brokerUser: "")
+                do { try b.client.connect(); return b }
+                catch SafeskiError.notFound { /* no agent registered for us: use the store in-process */ }
             }
         }
         return try LocalBackend(paths: paths)

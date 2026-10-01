@@ -35,7 +35,9 @@ public final class AgentServer {
         try? service.audit.append(action: "agent.stop", outcome: "allow", caller: nil)
     }
 
-    private func handle(fd: Int32, caller: CallerIdentity) {
+    private func handle(fd: Int32, caller peer: CallerIdentity) {
+        var caller = peer
+        var first = true
         while true {
             let frame: Data?
             do { frame = try Framing.readFrame(fd: fd) } catch { return }
@@ -43,7 +45,19 @@ public final class AgentServer {
             let resp: RPCResponse
             do {
                 let req = try JSONDecoder.safeski.decode(RPCRequest.self, from: frame)
-                resp = service.dispatch(req, caller: caller, socket: paths.agentSocket.path, sshSocket: sshSocketPath)
+                if first, req.method == BrokerProtocol.helloMethod {
+                    // The root broker forwards the real caller's identity in its first frame.
+                    first = false
+                    if BrokerProtocol.isTrustedBrokerPeer(peer) {
+                        caller = try BrokerProtocol.forwardedIdentity(from: req.params)
+                        resp = RPCResponse(id: req.id, result: .bool(true))
+                    } else {
+                        resp = RPCResponse(id: req.id, error: RPCError(code: "denied", message: "\(BrokerProtocol.helloMethod) is only accepted from the root broker"))
+                    }
+                } else {
+                    first = false
+                    resp = service.dispatch(req, caller: caller, socket: paths.agentSocket.path, sshSocket: sshSocketPath)
+                }
             } catch {
                 resp = RPCResponse(id: 0, error: RPCError(code: "invalid_format", message: "bad request: \(error.localizedDescription)"))
             }
