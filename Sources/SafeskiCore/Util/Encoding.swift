@@ -56,11 +56,12 @@ public struct SSHWire {
     }
     public mutating func writeString(_ s: String) { writeString(Data(s.utf8)) }
     public mutating func writeMPInt(_ raw: Data) {
-        // strip leading zeros, prepend 0x00 if high bit set
-        var bytes = Data(raw)
+        // strip leading zeros, prepend 0x00 if high bit set.
+        // Work on [UInt8]: Data.removeFirst() shifts startIndex, so a later insert(_, at: 0) would trap.
+        var bytes = [UInt8](raw)
         while bytes.first == 0 && bytes.count > 1 { bytes.removeFirst() }
         if let f = bytes.first, f & 0x80 != 0 { bytes.insert(0, at: 0) }
-        writeString(bytes)
+        writeString(Data(bytes))
     }
     public mutating func writeByte(_ b: UInt8) { data.append(b) }
     public mutating func writeBool(_ b: Bool) { data.append(b ? 1 : 0) }

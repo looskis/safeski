@@ -64,12 +64,14 @@ public final class Service {
         let h = Data(SHA256.hash(data: Data(token.utf8))).hexString
         for (name, tp) in policy.tokens where tp.hash == h {
             if let e = tp.expires, e < Date() { return nil }
-            // Token callers are identified by the token alone: peer code identity is not trusted
-            // (it may be a relay such as the broker or a container socket proxy).
+            // Token callers are identified by the token alone: peer identity is not trusted
+            // (it may be a relay such as the broker or a container socket proxy), so drop every
+            // attribute that policy rules or the approval cache could otherwise match on.
             var c = base
             c.tokenName = name
             c.transport = "token"
             c.path = nil; c.parentPath = nil; c.teamID = nil; c.signingID = nil; c.signatureValid = nil
+            c.uid = nil; c.gid = nil; c.commandLine = nil
             return c
         }
         return nil

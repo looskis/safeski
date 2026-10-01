@@ -9,7 +9,8 @@ public enum Framing {
         guard let header = try readExact(fd: fd, count: 4) else { return nil }
         let n = Int(header[0]) << 24 | Int(header[1]) << 16 | Int(header[2]) << 8 | Int(header[3])
         guard n <= maxFrame else { throw SafeskiError.rpc("frame too large (\(n))") }
-        guard let body = try readExact(fd: fd, count: n) else { throw SafeskiError.rpc("truncated frame") }
+        // readExact returns a short buffer on EOF; a partial body is a truncated frame, not a frame.
+        guard let body = try readExact(fd: fd, count: n), body.count == n else { throw SafeskiError.rpc("truncated frame") }
         return body
     }
 
