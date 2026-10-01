@@ -51,7 +51,7 @@ public enum JSONValue: Codable, Equatable, CustomStringConvertible {
     public var isNull: Bool { if case .null = self { return true }; return false }
 
     public var description: String {
-        let enc = JSONEncoder(); enc.outputFormatting = [.sortedKeys]
+        let enc = JSONEncoder(); enc.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         return (try? enc.encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? "<json>"
     }
 

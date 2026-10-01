@@ -1,5 +1,12 @@
 // swift-tools-version:5.10
+import Foundation
 import PackageDescription
+
+// Swift 6.4 Command Line Tools ship the Swift Testing macros plugin but do not auto-load it,
+// so `swift test` fails with "plugin for module 'TestingMacros' not found". Point at it when present.
+let testingPluginPath = "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing"
+let testSwiftSettings: [SwiftSetting] = FileManager.default.fileExists(atPath: testingPluginPath)
+    ? [.unsafeFlags(["-plugin-path", testingPluginPath])] : []
 
 let package = Package(
     name: "safeski",
@@ -39,7 +46,8 @@ let package = Package(
         .testTarget(
             name: "SafeskiCoreTests",
             dependencies: ["SafeskiCore"],
-            path: "Tests/SafeskiCoreTests"
+            path: "Tests/SafeskiCoreTests",
+            swiftSettings: testSwiftSettings
         ),
     ],
     swiftLanguageVersions: [.v5]
