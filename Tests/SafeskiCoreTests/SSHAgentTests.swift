@@ -94,7 +94,7 @@ import Testing
 // MARK: - end to end against a real Service and socket
 
 /// Temp home + short runtime dir for one test. Removed on deinit.
-final class TempHome {
+final class SSHTempHome {
     let paths: SafeskiPaths
     let socket: String
     init() throws {
@@ -128,7 +128,7 @@ struct RawAgentClient {
         Issue.record("Secure Enclave not available in this process; skipping end-to-end test")
         return
     }
-    let home = try TempHome()
+    let home = try SSHTempHome()
     let store = Store(paths: home.paths)
     try store.initialize(name: "test")
     // Silent policy: no prompts in tests.
