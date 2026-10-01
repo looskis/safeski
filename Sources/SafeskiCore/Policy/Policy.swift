@@ -195,7 +195,7 @@ public enum Policy {
 
     /// Evaluate a caller against a resource. `kind` is "key" or "secret".
     public static func evaluate(_ doc: PolicyDocument, kind: String, resource: String, caller: CallerIdentity) -> Decision {
-        if doc.defaults.requireValidSignature, caller.transport == "unix", caller.signatureValid != true {
+        if doc.defaults.requireValidSignature, caller.transport == "unix" || caller.transport == "broker", caller.signatureValid != true {
             return Decision(verdict: .deny("caller code signature is invalid or unverifiable"), rule: nil, ttl: 0)
         }
         let table = kind == "key" ? doc.keys : doc.secrets

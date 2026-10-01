@@ -1,0 +1,36 @@
+#!/bin/sh
+# safeski-get: print a secret from the safeski agent (for containers / hosts without the Swift CLI).
+#
+#   safeski-get NAME [PURPOSE]        -> secret bytes on stdout
+#   SAFESKI_SOCKET  (default /run/safeski/agent.sock)
+#   SAFESKI_TOKEN   (required inside containers: peer credentials do not cross the VM boundary)
+#
+# Uses python3 when available (clients/python/safeski.py next to this script, or on PYTHONPATH);
+# falls back to node (clients/node/safeski.js). POSIX sh, no bashisms.
+set -eu
+
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "usage: safeski-get NAME [PURPOSE]" >&2
+  exit 2
+fi
+
+here=$(cd "$(dirname "$0")" && pwd)
+py_client=""
+for cand in "$here/../python/safeski.py" "$here/safeski.py" /usr/local/lib/safeski/safeski.py /usr/lib/safeski/safeski.py; do
+  if [ -f "$cand" ]; then py_client=$cand; break; fi
+done
+js_client=""
+for cand in "$here/../node/safeski.js" "$here/safeski.js" /usr/local/lib/safeski/safeski.js /usr/lib/safeski/safeski.js; do
+  if [ -f "$cand" ]; then js_client=$cand; break; fi
+done
+
+if command -v python3 >/dev/null 2>&1 && [ -n "$py_client" ]; then
+  exec python3 "$py_client" get "$@"
+elif command -v python3 >/dev/null 2>&1; then
+  exec python3 -c 'import sys; from safeski import _main; sys.exit(_main(["safeski"] + sys.argv[1:]))' get "$@"
+elif command -v node >/dev/null 2>&1 && [ -n "$js_client" ]; then
+  exec node "$js_client" get "$@"
+fi
+
+echo "safeski-get: need python3 (with clients/python/safeski.py) or node (with clients/node/safeski.js)" >&2
+exit 1

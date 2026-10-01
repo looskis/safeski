@@ -19,6 +19,6 @@ enum AgentExtensions {
         try BrokerFrontend.registerWithBroker(agent: agent)
     }
     static func stop() {
-        SSHFrontend.stop(); ProxyFrontend.stop(); OIDCFrontend.stop()
+        SSHFrontend.stop(); ProxyFrontend.stop(); OIDCFrontend.stop(); BrokerFrontend.stop()
     }
 }
