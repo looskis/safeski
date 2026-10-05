@@ -194,7 +194,9 @@ SAFESKI_DISABLE_ENCLAVE=1 swift test   # reproduces CI, where no enclave exists:
 ```
 
 Tests use Swift Testing. On a Command Line Tools-only Mac, `Package.swift` points the compiler at
-the Testing macro plugin, which that toolchain does not load on its own. For manual testing, set
+the Testing macro plugin, which that toolchain does not load on its own. That toolchain still
+occasionally fails a test build with "plugin for module 'TestingMacros' not found"; rerun
+`swift test`, or delete `.build/manifest.pif` first. Full Xcode does not have the problem. For manual testing, set
 `SAFESKI_HOME` and `SAFESKI_RUNTIME_DIR` to scratch directories so `~/.safeski` is never touched;
 keep the runtime path short, since unix socket paths are limited to 104 bytes.
 

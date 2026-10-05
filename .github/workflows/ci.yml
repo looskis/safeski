@@ -7,11 +7,14 @@ on:
 
 jobs:
   build-test:
-    # Hosted macOS runners are virtual machines with no Secure Enclave. Tests marked
-    # `.requiresEnclave` skip here; parsing, policy, protocol, proxy, and encoding tests run.
-    # Run `swift test` on a real Mac for the full suite.
+    # Hosted macOS runners are virtual machines with no usable Secure Enclave, and asking
+    # CryptoKit about it can block there. SAFESKI_DISABLE_ENCLAVE=1 makes safeski and its tests
+    # skip the question: tests marked `.requiresEnclave` are skipped; parsing, policy, protocol,
+    # proxy, and encoding tests run. Run `swift test` on a real Mac for the full suite.
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
+    env:
+      SAFESKI_DISABLE_ENCLAVE: "1"
     steps:
       - uses: actions/checkout@v4
       - name: Swift version

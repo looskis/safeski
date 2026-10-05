@@ -71,7 +71,27 @@ struct EnclaveSerialized: TestTrait, SuiteTrait, TestScoping {
 extension Trait where Self == ConditionTrait {
     /// Skips the test where no Secure Enclave exists (CI virtual machines), or when
     /// `SAFESKI_DISABLE_ENCLAVE=1` reproduces that locally.
-    static var requiresEnclave: Self { .enabled(if: Enclave.isAvailable, "needs a Secure Enclave") }
+    static var requiresEnclave: Self { .enabled(if: EnclaveProbe.usable, "needs a working Secure Enclave") }
+}
+
+/// Whether this machine has an enclave that actually works, decided once per test process.
+/// Swift Testing evaluates `.enabled(if:)` while planning the run, so this must never block:
+/// on some virtual machines (GitHub's hosted macOS runners) asking CryptoKit about the enclave
+/// hangs outright. Everything that touches the enclave therefore runs on a separate thread and
+/// is abandoned after a few seconds. `SAFESKI_DISABLE_ENCLAVE=1` skips the question entirely.
+enum EnclaveProbe {
+    static let usable: Bool = {
+        if let v = getenv("SAFESKI_DISABLE_ENCLAVE"), String(cString: v) == "1" { return false }
+        let done = DispatchSemaphore(value: 0)
+        final class Box: @unchecked Sendable { var ok = false }
+        let box = Box()
+        Thread.detachNewThread {
+            box.ok = Enclave.isAvailable && (try? EnclaveSigningKey(create: .none)) != nil
+            done.signal()
+        }
+        guard done.wait(timeout: .now() + 5) == .success else { return false }
+        return box.ok
+    }()
 }
 
 extension Trait where Self == EnclaveSerialized {
