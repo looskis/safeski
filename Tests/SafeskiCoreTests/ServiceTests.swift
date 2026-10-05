@@ -16,7 +16,7 @@ private final class PromptRecorder {
     }
 }
 
-@Suite("Service approval flow", .enclaveSerialized)
+@Suite("Service approval flow", .requiresEnclave, .enclaveSerialized)
 struct ServiceTests {
     private static let policy = """
     [defaults]

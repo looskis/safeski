@@ -31,7 +31,13 @@ public enum AccessPolicy: String, Codable, CaseIterable {
 }
 
 public enum Enclave {
-    public static var isAvailable: Bool { SecureEnclave.isAvailable }
+    /// True when this process can use the Secure Enclave. Setting `SAFESKI_DISABLE_ENCLAVE=1` forces
+    /// false, which is how the test suite reproduces machines without one (CI VMs). It can only
+    /// make safeski refuse to work; it never substitutes software keys.
+    public static var isAvailable: Bool {
+        if let v = getenv("SAFESKI_DISABLE_ENCLAVE"), String(cString: v) == "1" { return false }
+        return SecureEnclave.isAvailable
+    }
 
     public static func requireAvailable() throws {
         guard isAvailable else { throw SafeskiError.enclaveUnavailable }

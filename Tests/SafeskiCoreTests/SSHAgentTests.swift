@@ -123,7 +123,7 @@ struct RawAgentClient {
     func call(_ req: SSHAgentRequest) throws -> Data { try roundTrip(SSHAgentProtocol.encodeRequest(req)) }
 }
 
-@Test func sshAgentEndToEnd() throws {
+@Test(.requiresEnclave) func sshAgentEndToEnd() throws {
     guard Enclave.isAvailable else {
         Issue.record("Secure Enclave not available in this process; skipping end-to-end test")
         return

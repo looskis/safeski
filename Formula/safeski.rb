@@ -1,5 +1,9 @@
 # Homebrew formula skeleton for safeski. Builds from source with SwiftPM.
 #
+# Not yet published: there is no v0.1.0 tag, so `url`/`sha256` below are placeholders. Until a
+# release is cut and this is copied into looskis/homebrew-tap, install with scripts/install.sh
+# or `brew install --HEAD --build-from-source ./Formula/safeski.rb`.
+#
 #   brew install --build-from-source ./Formula/safeski.rb
 #   brew services start safeski          # per-user LaunchAgent running `safeski agent start`
 #
@@ -13,11 +17,10 @@
 #   and follow the printed sudo commands.
 class Safeski < Formula
   desc "Secure Enclave-backed keys and secrets for ssh, git, AI agents, containers and apps"
-  homepage "https://github.com/safeski/safeski"
-  url "https://github.com/safeski/safeski/archive/refs/tags/v0.1.0.tar.gz"
+  homepage "https://github.com/looskis/safeski"
+  url "https://github.com/looskis/safeski/archive/refs/tags/v0.1.0.tar.gz"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000" # TODO: fill on release
-  license "MIT"
-  head "https://github.com/safeski/safeski.git", branch: "main"
+  head "https://github.com/looskis/safeski.git", branch: "main"
 
   depends_on :macos
   depends_on xcode: ["15.0", :build] # Command Line Tools with Swift 6 are sufficient; brew needs *a* toolchain

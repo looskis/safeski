@@ -68,6 +68,12 @@ struct EnclaveSerialized: TestTrait, SuiteTrait, TestScoping {
     }
 }
 
+extension Trait where Self == ConditionTrait {
+    /// Skips the test where no Secure Enclave exists (CI virtual machines), or when
+    /// `SAFESKI_DISABLE_ENCLAVE=1` reproduces that locally.
+    static var requiresEnclave: Self { .enabled(if: Enclave.isAvailable, "needs a Secure Enclave") }
+}
+
 extension Trait where Self == EnclaveSerialized {
     static var enclaveSerialized: Self { Self() }
 }

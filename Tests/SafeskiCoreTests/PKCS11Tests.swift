@@ -94,7 +94,7 @@ private struct P11 {
     }
 }
 
-@Test(.enabled(if: PKCS11Fixture.moduleExists, "build libsafeski-pkcs11.dylib first"))
+@Test(.requiresEnclave, .enabled(if: PKCS11Fixture.moduleExists, "build libsafeski-pkcs11.dylib first"))
 func pkcs11ModuleSignsWithEnclaveKeyThroughAgent() throws {
     // Short root: the agent socket path must fit sockaddr_un.
     let root = URL(fileURLWithPath: "/tmp/ssk-p11-test-\(getpid())")

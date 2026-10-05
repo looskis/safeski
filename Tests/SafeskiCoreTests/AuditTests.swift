@@ -120,7 +120,7 @@ struct AuditTests {
         #expect(try AuditLog.readAll(url: home.paths.auditLog).map(\.action) == ["one", "two", "three", "four"])
     }
 
-    @Test func signHeadVerifiesWithIdentityKey() throws {
+    @Test(.requiresEnclave) func signHeadVerifiesWithIdentityKey() throws {
         let home = try TempHome("audit-sign")
         defer { home.cleanup() }
         let log = try AuditLog(url: home.paths.auditLog)

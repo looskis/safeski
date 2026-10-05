@@ -300,7 +300,7 @@ struct RuleMatchTests {
         #expect(!Rule(token: "ci").matches(c))
     }
 
-    @Test(.enclaveSerialized) func tokenCallersDoNotMatchPathRules() throws {
+    @Test(.requiresEnclave, .enclaveSerialized) func tokenCallersDoNotMatchPathRules() throws {
         var t = CallerIdentity(transport: "token"); t.tokenName = "ci"
         #expect(t.path == nil)
         #expect(!Rule(path: "**").matches(t))

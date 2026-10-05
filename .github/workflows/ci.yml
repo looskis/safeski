@@ -7,14 +7,13 @@ on:
 
 jobs:
   build-test:
-    # macOS runner: Secure Enclave is unavailable on CI hardware, so enclave-backed tests
-    # are expected to skip or use software keys; the broker/RPC/policy tests run fully.
-    runs-on: macos-15
+    # Hosted macOS runners are virtual machines with no Secure Enclave. Tests marked
+    # `.requiresEnclave` skip here; parsing, policy, protocol, proxy, and encoding tests run.
+    # Run `swift test` on a real Mac for the full suite.
+    runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode (Swift 6)
-        run: sudo xcode-select -s /Applications/Xcode_16.app || true
       - name: Swift version
         run: swift --version
       - name: Cache SwiftPM

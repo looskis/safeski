@@ -4,7 +4,7 @@ import Foundation
 ///
 /// ```toml
 /// [oidc]
-/// issuer = "https://oidc.example.com/lookevink-mbp"   # public HTTPS URL (AWS requires it)
+/// issuer = "https://oidc.example.com/my-mac"   # public HTTPS URL (AWS requires it)
 /// key = "oidc"                                        # enclave-signing key name
 /// default_ttl = 3600
 /// listen = "127.0.0.1:7866"                           # optional local discovery/JWKS server

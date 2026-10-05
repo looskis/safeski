@@ -134,7 +134,7 @@ private final class LiveAgent {
     }
 }
 
-@Suite("RPC over a live agent", .enclaveSerialized)
+@Suite("RPC over a live agent", .requiresEnclave, .enclaveSerialized)
 struct AgentRPCTests {
     static let allowAll = "[defaults]\napprove = \"never\"\n"
 

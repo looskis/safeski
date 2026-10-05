@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import SafeskiCore
 
-@Suite("Store", .enclaveSerialized)
+@Suite("Store", .requiresEnclave, .enclaveSerialized)
 struct StoreTests {
     private func initializedStore(_ prefix: String = "store") throws -> (TempHome, Store) {
         let home = try TempHome(prefix)

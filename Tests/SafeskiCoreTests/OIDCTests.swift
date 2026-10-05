@@ -76,7 +76,7 @@ struct OIDCFixture {
 
 // MARK: - JWT minting with a real enclave key
 
-@Test func mintedJWTVerifiesWithCryptoKit() throws {
+@Test(.requiresEnclave) func mintedJWTVerifiesWithCryptoKit() throws {
     let fx = try OIDCFixture()
     defer { fx.cleanup() }
     let issuer = try fx.issuer()
@@ -137,7 +137,7 @@ struct OIDCFixture {
     #expect(try issuer.key(forKid: "nope") == nil)
 }
 
-@Test func mintRejectsBadRequests() throws {
+@Test(.requiresEnclave) func mintRejectsBadRequests() throws {
     let fx = try OIDCFixture()
     defer { fx.cleanup() }
     let issuer = try fx.issuer()
@@ -151,7 +151,7 @@ struct OIDCFixture {
     #expect(throws: SafeskiError.self) { try unconfigured.mint(TokenRequest(aud: "x")) }
 }
 
-@Test func mintSignsWithPurposeAndSubjectTemplate() throws {
+@Test(.requiresEnclave) func mintSignsWithPurposeAndSubjectTemplate() throws {
     let fx = try OIDCFixture()
     defer { fx.cleanup() }
     var purposes: [String] = []
@@ -170,7 +170,7 @@ struct OIDCFixture {
 
 // MARK: - JWKS / discovery
 
-@Test func jwksAndDiscoveryShape() throws {
+@Test(.requiresEnclave) func jwksAndDiscoveryShape() throws {
     let fx = try OIDCFixture()
     defer { fx.cleanup() }
     // A second key labeled for publication, and a third that is not.
@@ -214,7 +214,7 @@ struct OIDCFixture {
     #expect(published == jwks)
 }
 
-@Test func httpServerServesDiscoveryAndJWKS() throws {
+@Test(.requiresEnclave) func httpServerServesDiscoveryAndJWKS() throws {
     let fx = try OIDCFixture()
     defer { fx.cleanup() }
     let issuer = try fx.issuer()
@@ -403,7 +403,7 @@ let cannedAssumeRoleXML = """
 }
 
 /// End to end: a minted token slotted into each cloud's request without sending anything.
-@Test func dryRunWithRealTokenForAllClouds() throws {
+@Test(.requiresEnclave) func dryRunWithRealTokenForAllClouds() throws {
     let fx = try OIDCFixture()
     defer { fx.cleanup() }
     let issuer = try fx.issuer()

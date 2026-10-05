@@ -5,7 +5,7 @@ import Testing
 
 /// In-process agent + broker on temp sockets. The broker runs as the current user, so the agent
 /// is told to trust forwarded identities from this uid via SAFESKI_BROKER_TRUST_UID (test-only).
-@Test func brokerForwardsCallsWithForwardedIdentity() throws {
+@Test(.requiresEnclave) func brokerForwardsCallsWithForwardedIdentity() throws {
     // Short paths: sun_path is 104 bytes.
     let base = "/tmp/ssk-bt-\(getpid())"
     try? FileManager.default.removeItem(atPath: base)

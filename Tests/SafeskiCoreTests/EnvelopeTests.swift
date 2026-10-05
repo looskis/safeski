@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import SafeskiCore
 
-@Suite("Envelope", .enclaveSerialized)
+@Suite("Envelope", .requiresEnclave, .enclaveSerialized)
 struct EnvelopeTests {
     private func recipient(_ id: String) throws -> (Envelope.RecipientKey, EnclaveAgreementKey) {
         let k = try EnclaveAgreementKey(create: .none)
